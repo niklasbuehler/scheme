@@ -34,12 +34,15 @@ readExpr input = case parse parseExpr "lisp" input of
 parseExpr :: Parser LispVal
 parseExpr = parseCharacter
         <|> parseString
-        <|> try parseComplex
-        <|> try parseRational
         <|> try parseReal
+        <|> try parseRational
+        <|> try parseComplex
         <|> parseNumber
-        <|> parseAtom
         <|> parseQuoted
+        <|> parseQuasiQuoted
+        <|> try parseUnQuote
+        <|> parseUnQuoteSplicing
+        <|> parseAtom
         <|> do char '('
                x <- try parseList <|> parseDottedList
                char ')'
@@ -49,7 +52,7 @@ spaces :: Parser ()
 spaces = skipMany1 space
 
 symbol :: Parser Char
-symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
+symbol = oneOf "!#$%&|*+-/:<=>?^_~"
 
 --- Parsing Character Types ---
 parseString :: Parser LispVal
@@ -88,6 +91,22 @@ parseQuoted :: Parser LispVal
 parseQuoted = do char '\''
                  x <- parseExpr
                  return $ List [Atom "quote", x]
+
+parseQuasiQuoted :: Parser LispVal
+parseQuasiQuoted = do char '`'
+                      x <- parseExpr
+                      return $ List [Atom "quasiquote", x]
+
+parseUnQuote :: Parser LispVal
+parseUnQuote = do char ','
+                  x <- parseExpr
+                  return $ List [Atom "unquote", x]
+
+parseUnQuoteSplicing :: Parser LispVal
+parseUnQuoteSplicing = do char ','
+                          char '@'
+                          x <- parseExpr
+                          return $ List [Atom "unquote-splicing", x]
 
 --- Parsing Atoms ---
 parseAtom :: Parser LispVal
