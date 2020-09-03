@@ -14,6 +14,7 @@ data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
              | Number Integer
+             | Float Double
              | String String
              | Character Char
              | Bool Bool
@@ -32,16 +33,17 @@ symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 
 parseString :: Parser LispVal
 parseString = do char '"'
-                 x <- many (escape <|> (noneOf "\""))
+                 x <- many (escapedChar <|> (noneOf "\""))
                  char '"'
                  return $ String x
-  where escape :: Parser Char
-        escape = do x <- char '\\' >> oneOf "\"nrt\\"
-                    return $ case x of
-                      'n' -> '\n'
-                      'r' -> '\n'
-                      't' -> '\n'
-                      _   -> x
+  where escapedChar :: Parser Char
+        escapedChar = do char '\\'
+                         x <- oneOf "\"nrt\\"
+                         return $ case x of
+                           'n' -> '\n'
+                           'r' -> '\n'
+                           't' -> '\n'
+                           _   -> x
 
 parseCharacter :: Parser LispVal
 parseCharacter = do try $ string "#\\"
@@ -83,8 +85,15 @@ parseNumber = do num <- parseDecimal
                       x <- many1 hexDigit
                       return $ Number (fst (readHex x !! 0))
 
+parseFloat :: Parser LispVal
+parseFloat = do x <- many1 digit
+                char '.'
+                y <- many1 digit
+                return $ Float (fst.head $ readFloat (x ++ "." ++ y))
+
 parseExpr :: Parser LispVal
 parseExpr = parseCharacter
         <|> parseString
+        <|> try parseFloat
         <|> parseNumber
         <|> parseAtom
