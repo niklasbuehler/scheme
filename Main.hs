@@ -15,6 +15,7 @@ data LispVal = Atom String
              | DottedList [LispVal] LispVal
              | Number Integer
              | String String
+             | Character Char
              | Bool Bool
              deriving Show
 
@@ -42,6 +43,15 @@ parseString = do char '"'
                       't' -> '\n'
                       _   -> x
 
+parseCharacter :: Parser LispVal
+parseCharacter = do try $ string "#\\"
+                    x <- try (string "newline" <|> string "space")
+                         <|> do {x <- anyChar; notFollowedBy alphaNum; return [x]}
+                    return $ Character $ case x of
+                      "space"   -> ' '
+                      "newline" -> '\n'
+                      otherwise -> (x !! 0)
+
 parseAtom :: Parser LispVal
 parseAtom = do first <- letter <|> symbol
                rest <- many (letter <|> digit <|> symbol)
@@ -67,13 +77,14 @@ parseNumber = do num <- parseDecimal
                          return $ Number (readBin x)
         readBin = foldl' (\acc x -> acc * 2 + (toInteger . digitToInt) x) 0
         parseOctal = do try $ string "#o"
-                        x <- many1 (oneOf "01234567")
+                        x <- many1 octDigit
                         return $ Number (fst (readOct x !! 0))
         parseHex = do try $ string "#x"
-                      x <- many1 (oneOf "ABCDEFabcdef0123456789")
+                      x <- many1 hexDigit
                       return $ Number (fst (readHex x !! 0))
 
 parseExpr :: Parser LispVal
-parseExpr = parseString
+parseExpr = parseCharacter
+        <|> parseString
         <|> parseNumber
         <|> parseAtom
