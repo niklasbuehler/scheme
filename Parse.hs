@@ -25,7 +25,23 @@ data LispVal = Atom String
              | String String
              | Character Char
              | Bool Bool
-             deriving Show
+
+instance Show LispVal where show = showVal
+showVal :: LispVal -> String
+showVal (Atom name) = name
+showVal (List contents) = "(" ++ unwordsList contents ++ ")"
+showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
+showVal (Vector array) = "#(" ++ show (unwordsList (elems array)) ++ ")"
+showVal (Number contents) = show contents
+showVal (Real contents) = show contents
+showVal (Rational contents) = show contents
+showVal (Complex contents) = show contents
+showVal (String contents) = "\"" ++ contents ++ "\""
+showVal (Character contents) = "'" ++ [contents] ++ "'"
+showVal (Bool True) = "#t"
+showVal (Bool False) = "#f"
+unwordsList :: [LispVal] -> String
+unwordsList = unwords . map showVal
 
 --- Parsing ---
 readExpr :: String -> String
@@ -58,17 +74,18 @@ symbol = oneOf "?!$%^&+-*/:<=>_~"
 --- Parsing Character Types ---
 parseString :: Parser LispVal
 parseString = do char '"'
-                 x <- many (escapedChar <|> (noneOf "\""))
+                 x <- many (parseEscapedCharacter <|> (noneOf "\""))
                  char '"'
                  return $ String x
-  where escapedChar :: Parser Char
-        escapedChar = do char '\\'
-                         x <- oneOf "\"nrt\\"
-                         return $ case x of
-                           'n' -> '\n'
-                           'r' -> '\n'
-                           't' -> '\n'
-                           _   -> x
+
+parseEscapedCharacter :: Parser Char
+parseEscapedCharacter = do try $ char '\\'
+                           x <- oneOf "\"nrt\\"
+                           return $ case x of
+                             'n' -> '\n'
+                             'r' -> '\r'
+                             't' -> '\t'
+                             _   -> x
 
 parseCharacter :: Parser LispVal
 parseCharacter = do try $ string "#\\"

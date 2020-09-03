@@ -5,9 +5,9 @@ Just my own implementation (and extension?) of the [Write Yourself a Scheme in 4
 
 ## Exercises
 ### Exercises 1.1
-- [ ] Rewrite `parseNumber` without `liftM`
+- [ ] Rewrite `parseNumber` without using `liftM`
 - [x] Parsing `\"` ([R5RS compliance](https://schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.5))
-- [x] Parse other escaped characters (`\n`, `\r`, `\t`, `\\` in strings
+- [x] Parse other escaped characters (`\n`, `\r`, `\t`, `\\`) in strings
 - [x] Parse [numbers of different bases](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.2.4)
 - [x] Parse [character literals](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.4)
 - [x] Parse [Reals](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.2.4)
