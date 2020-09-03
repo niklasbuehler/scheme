@@ -6,6 +6,7 @@ import Numeric
 import Data.Char (digitToInt)
 import Data.List (foldl')
 import Data.Ratio
+import Data.Complex
 
 main :: IO ()
 main = do (expr:_) <- getArgs
@@ -17,6 +18,7 @@ data LispVal = Atom String
              | Number Integer
              | Real Double
              | Rational Rational
+             | Complex (Complex Double)
              | String String
              | Character Char
              | Bool Bool
@@ -72,20 +74,31 @@ parseNumber = do num <- parseDecimal
                     <|> parseOctal
                     <|> parseHex
                  return $ num
-  where parseDecimal = liftM (Number . read) $ many1 digit
-        parseDecimal' = do try $ string "#d"
-                           x <- many1 digit
-                           return $ Number (read x)
-        parseBinary = do try $ string "#b"
-                         x <- many1 (oneOf "01")
-                         return $ Number (readBin x)
+
+parseDecimal :: Parser LispVal
+parseDecimal = liftM (Number . read) $ many1 digit
+
+parseDecimal' :: Parser LispVal
+parseDecimal' = do try $ string "#d"
+                   x <- many1 digit
+                   return $ Number (read x)
+
+parseBinary :: Parser LispVal
+parseBinary = do try $ string "#b"
+                 x <- many1 (oneOf "01")
+                 return $ Number (readBin x)
+  where readBin :: String -> Integer
         readBin = foldl' (\acc x -> acc * 2 + (toInteger . digitToInt) x) 0
-        parseOctal = do try $ string "#o"
-                        x <- many1 octDigit
-                        return $ Number (fst (readOct x !! 0))
-        parseHex = do try $ string "#x"
-                      x <- many1 hexDigit
-                      return $ Number (fst (readHex x !! 0))
+
+parseOctal :: Parser LispVal
+parseOctal = do try $ string "#o"
+                x <- many1 octDigit
+                return $ Number (fst (readOct x !! 0))
+
+parseHex :: Parser LispVal
+parseHex = do try $ string "#x"
+              x <- many1 hexDigit
+              return $ Number (fst (readHex x !! 0))
 
 parseReal :: Parser LispVal
 parseReal = do x <- many1 digit
@@ -99,10 +112,22 @@ parseRational = do x <- many1 digit
                    y <- many1 digit
                    return $ Rational ((read x) % (read y))
 
+toDouble :: LispVal -> Double
+toDouble (Real r) = realToFrac r
+toDouble (Number n) = fromIntegral n
+
+parseComplex :: Parser LispVal
+parseComplex = do x <- (try parseReal <|> parseDecimal)
+                  char '+'
+                  y <- (try parseReal <|> parseDecimal)
+                  char 'i'
+                  return $ Complex (toDouble x :+ toDouble y)
+
 parseExpr :: Parser LispVal
 parseExpr = parseCharacter
         <|> parseString
-        <|> try parseReal
+        <|> try parseComplex
         <|> try parseRational
+        <|> try parseReal
         <|> parseNumber
         <|> parseAtom
