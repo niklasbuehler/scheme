@@ -15,7 +15,7 @@ data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
              | Number Integer
-             | Float Double
+             | Real Double
              | Rational Rational
              | String String
              | Character Char
@@ -87,11 +87,11 @@ parseNumber = do num <- parseDecimal
                       x <- many1 hexDigit
                       return $ Number (fst (readHex x !! 0))
 
-parseFloat :: Parser LispVal
-parseFloat = do x <- many1 digit
-                char '.'
-                y <- many1 digit
-                return $ Float (fst.head $ readFloat (x ++ "." ++ y))
+parseReal :: Parser LispVal
+parseReal = do x <- many1 digit
+               char '.'
+               y <- many1 digit
+               return $ Real (fst.head $ readFloat (x ++ "." ++ y))
 
 parseRational :: Parser LispVal
 parseRational = do x <- many1 digit
@@ -102,7 +102,7 @@ parseRational = do x <- many1 digit
 parseExpr :: Parser LispVal
 parseExpr = parseCharacter
         <|> parseString
-        <|> try parseFloat
+        <|> try parseReal
         <|> try parseRational
         <|> parseNumber
         <|> parseAtom
