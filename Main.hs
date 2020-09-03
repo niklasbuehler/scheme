@@ -30,9 +30,17 @@ data LispVal = Atom String
 parseString :: Parser LispVal
 parseString = do
                 char '"'
-                x <- many (noneOf "\"")
+                x <- many (escape <|> (noneOf "\""))
                 char '"'
                 return $ String x
+  where escape :: Parser Char
+        escape = do
+                   x <- char '\\' >> oneOf "\"nrt\\"
+                   return $ case x of
+                     'n' -> '\n'
+                     'r' -> '\n'
+                     't' -> '\n'
+                     _   -> x
 
 parseAtom :: Parser LispVal
 parseAtom = do
