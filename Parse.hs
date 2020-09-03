@@ -12,6 +12,7 @@ main :: IO ()
 main = do (expr:_) <- getArgs
           putStrLn (readExpr expr)
 
+--- Datatypes ---
 data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
@@ -24,10 +25,20 @@ data LispVal = Atom String
              | Bool Bool
              deriving Show
 
+--- Parsing ---
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
   Left err -> "No match: " ++ show err
   Right val -> "Found value: " ++ show val
+
+parseExpr :: Parser LispVal
+parseExpr = parseCharacter
+        <|> parseString
+        <|> try parseComplex
+        <|> try parseRational
+        <|> try parseReal
+        <|> parseNumber
+        <|> parseAtom
 
 spaces :: Parser ()
 spaces = skipMany1 space
@@ -35,6 +46,7 @@ spaces = skipMany1 space
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 
+--- Parsing Character Types ---
 parseString :: Parser LispVal
 parseString = do char '"'
                  x <- many (escapedChar <|> (noneOf "\""))
@@ -58,6 +70,7 @@ parseCharacter = do try $ string "#\\"
                       "newline" -> '\n'
                       otherwise -> (x !! 0)
 
+--- Parsing Atoms ---
 parseAtom :: Parser LispVal
 parseAtom = do first <- letter <|> symbol
                rest <- many (letter <|> digit <|> symbol)
@@ -67,6 +80,7 @@ parseAtom = do first <- letter <|> symbol
                  "#f" -> Bool False
                  _    -> Atom atom
 
+--- Parsing Numerical Types ---
 parseNumber :: Parser LispVal
 parseNumber = do num <- parseDecimal
                     <|> parseDecimal'
@@ -112,22 +126,12 @@ parseRational = do x <- many1 digit
                    y <- many1 digit
                    return $ Rational ((read x) % (read y))
 
-toDouble :: LispVal -> Double
-toDouble (Real r) = realToFrac r
-toDouble (Number n) = fromIntegral n
-
 parseComplex :: Parser LispVal
 parseComplex = do x <- (try parseReal <|> parseDecimal)
                   char '+'
                   y <- (try parseReal <|> parseDecimal)
                   char 'i'
                   return $ Complex (toDouble x :+ toDouble y)
-
-parseExpr :: Parser LispVal
-parseExpr = parseCharacter
-        <|> parseString
-        <|> try parseComplex
-        <|> try parseRational
-        <|> try parseReal
-        <|> parseNumber
-        <|> parseAtom
+  where toDouble :: LispVal -> Double
+        toDouble (Real r) = realToFrac r
+        toDouble (Number n) = fromIntegral n
