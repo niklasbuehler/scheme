@@ -20,5 +20,6 @@ Just my own implementation (and extension?) of the [Write Yourself a Scheme in 4
 
 ## TODO
 - [ ] Parse escaped characters, even when they're not part of a string
+- [ ] Eval pattern for `quasiquote` and `unquote-splicing`
 
 [tutorial]: https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours

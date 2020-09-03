@@ -1,6 +1,5 @@
-module Main where
+module Parse where
 import Text.ParserCombinators.Parsec hiding (spaces)
-import System.Environment
 import Control.Monad
 import Numeric
 import Data.Char (digitToInt)
@@ -8,10 +7,6 @@ import Data.List (foldl')
 import Data.Ratio
 import Data.Complex
 import Data.Array
-
-main :: IO ()
-main = do (expr:_) <- getArgs
-          putStrLn (readExpr expr)
 
 --- Datatypes ---
 data LispVal = Atom String
@@ -44,10 +39,7 @@ unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
 
 --- Parsing ---
-readExpr :: String -> String
-readExpr input = case parse parseExpr "lisp" input of
-  Left err -> "No match: " ++ show err
-  Right val -> "Found value: " ++ show val
+parseScheme input = parse parseExpr "lisp" input
 
 parseExpr :: Parser LispVal
 parseExpr = parseCharacter
