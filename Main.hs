@@ -5,6 +5,7 @@ import Control.Monad
 import Numeric
 import Data.Char (digitToInt)
 import Data.List (foldl')
+import Data.Ratio
 
 main :: IO ()
 main = do (expr:_) <- getArgs
@@ -15,6 +16,7 @@ data LispVal = Atom String
              | DottedList [LispVal] LispVal
              | Number Integer
              | Float Double
+             | Rational Rational
              | String String
              | Character Char
              | Bool Bool
@@ -91,9 +93,16 @@ parseFloat = do x <- many1 digit
                 y <- many1 digit
                 return $ Float (fst.head $ readFloat (x ++ "." ++ y))
 
+parseRational :: Parser LispVal
+parseRational = do x <- many1 digit
+                   char '/'
+                   y <- many1 digit
+                   return $ Rational ((read x) % (read y))
+
 parseExpr :: Parser LispVal
 parseExpr = parseCharacter
         <|> parseString
         <|> try parseFloat
+        <|> try parseRational
         <|> parseNumber
         <|> parseAtom
