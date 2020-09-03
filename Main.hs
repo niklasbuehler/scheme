@@ -17,7 +17,7 @@ symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
     Left err -> "No match: " ++ show err
-    Right _ -> "Found value"
+    Right val -> "Found value: " ++ show val
 
 data LispVal = Atom String
              | List [LispVal]
@@ -25,6 +25,7 @@ data LispVal = Atom String
              | Number Integer
              | String String
              | Bool Bool
+             deriving Show
 
 parseString :: Parser LispVal
 parseString = do
