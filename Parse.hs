@@ -7,6 +7,7 @@ import Data.Char (digitToInt)
 import Data.List (foldl')
 import Data.Ratio
 import Data.Complex
+import Data.Array
 
 main :: IO ()
 main = do (expr:_) <- getArgs
@@ -16,6 +17,7 @@ main = do (expr:_) <- getArgs
 data LispVal = Atom String
              | List [LispVal]
              | DottedList [LispVal] LispVal
+             | Vector (Array Int LispVal)
              | Number Integer
              | Real Double
              | Rational Rational
@@ -43,16 +45,15 @@ parseExpr = parseCharacter
         <|> try parseUnQuote
         <|> parseUnQuoteSplicing
         <|> parseAtom
-        <|> do char '('
-               x <- try parseList <|> parseDottedList
-               char ')'
-               return x
+        <|> parseVector
+        <|> parseBool
+        <|> parseListType
 
 spaces :: Parser ()
 spaces = skipMany1 space
 
 symbol :: Parser Char
-symbol = oneOf "!#$%&|*+-/:<=>?^_~"
+symbol = oneOf "?!$%^&+-*/:<=>_~"
 
 --- Parsing Character Types ---
 parseString :: Parser LispVal
@@ -79,6 +80,12 @@ parseCharacter = do try $ string "#\\"
                       otherwise -> (x !! 0)
 
 --- Parsing Lists ---
+parseListType :: Parser LispVal
+parseListType = do char '('
+                   x <- try parseList <|> parseDottedList
+                   char ')'
+                   return x
+
 parseList :: Parser LispVal
 parseList = liftM List $ sepBy parseExpr spaces
 
@@ -103,20 +110,31 @@ parseUnQuote = do char ','
                   return $ List [Atom "unquote", x]
 
 parseUnQuoteSplicing :: Parser LispVal
-parseUnQuoteSplicing = do char ','
-                          char '@'
+parseUnQuoteSplicing = do try $ string ",@"
                           x <- parseExpr
                           return $ List [Atom "unquote-splicing", x]
+
+--- Parsing Vectors ---
+parseVector :: Parser LispVal
+parseVector = do try $ string "#("
+                 vecVals <- sepBy parseExpr spaces
+                 char ')'
+                 return $ Vector (listArray (0, (length vecVals - 1)) vecVals)
 
 --- Parsing Atoms ---
 parseAtom :: Parser LispVal
 parseAtom = do first <- letter <|> symbol
                rest <- many (letter <|> digit <|> symbol)
                let atom = first:rest
-               return $ case atom of
-                 "#t" -> Bool True
-                 "#f" -> Bool False
-                 _    -> Atom atom
+               return $ Atom atom
+
+--- Parsing Booleans ---
+parseBool :: Parser LispVal
+parseBool = do try $ char '#'
+               val <- oneOf "tf"
+               return $ case val of
+                 't' -> Bool True
+                 'f' -> Bool False
 
 --- Parsing Numerical Types ---
 parseNumber :: Parser LispVal
