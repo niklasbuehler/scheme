@@ -39,6 +39,7 @@ unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
 
 --- Parsing ---
+parseScheme :: String -> Either ParseError LispVal
 parseScheme input = parse parseExpr "lisp" input
 
 parseExpr :: Parser LispVal

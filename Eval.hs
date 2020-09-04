@@ -23,6 +23,7 @@ eval val@(Bool _) = val
 eval (List [Atom "quote", val]) = val
 eval (List (Atom func : args)) = apply func $ map eval args
 eval val@(List _) = val
+eval val@(DottedList _ _) = val
 
 apply :: String -> [LispVal] -> LispVal
 apply func args = maybe (Bool False) ($ args) $ lookup func primitives
@@ -34,14 +35,51 @@ primitives = [("+", numericBinop (+)),
               ("/", numericBinop div),
               ("mod", numericBinop mod),
               ("quotient", numericBinop quot),
-              ("remainder", numericBinop rem)]
+              ("remainder", numericBinop rem),
+              ("symbol?", unaryOp isSymbol),
+              ("char?", unaryOp isCharacter),
+              ("string?", unaryOp isString),
+              ("number?", unaryOp isNumber),
+              ("complex?", unaryOp isComplex),
+              ("real?", unaryOp isReal),
+              ("rational?", unaryOp isRational),
+              ("bool?", unaryOp isBool),
+              ("list?", unaryOp isList),
+              ("pair?", unaryOp isPair),
+              ("vector?", unaryOp isVector)]
+
+isSymbol, isCharacter, isString, isNumber, isReal, isRational, isComplex, isBool, isList, isPair, isVector :: LispVal -> LispVal
+isSymbol (Atom _)         = Bool True
+isSymbol _                = Bool False
+isCharacter (Character _) = Bool True
+isCharacter _             = Bool False
+isString (String _)       = Bool True
+isString _                = Bool False
+isNumber (Number _)       = Bool True
+isNumber _                = Bool False
+isReal (Real _)           = Bool True
+isReal _                  = Bool False
+isRational (Rational _)   = Bool True
+isRational _              = Bool False
+isComplex (Complex _)     = Bool True
+isComplex _               = Bool False
+isBool (Bool _)           = Bool True
+isBool _                  = Bool False
+isList (List _)           = Bool True
+isList _                  = Bool False
+isPair (DottedList _ _)   = Bool True
+isPair _                  = Bool False
+isVector (Vector _)       = Bool True
+isVector _                = Bool False
+
+unaryOp :: (LispVal -> LispVal) -> [LispVal] -> LispVal
+unaryOp f [v] = f v
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> LispVal
 numericBinop op params = Number $ foldl1 op $ map unpackNum params
-
 unpackNum :: LispVal -> Integer
 unpackNum (Number n) = n
-unpackNum (String n) = let parsed = reads n :: [(Integer, String)] in 
+unpackNum (String n) = let parsed = reads n :: [(Integer, String)] in
                            if null parsed
                               then 0
                               else fst $ parsed !! 0
