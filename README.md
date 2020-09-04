@@ -20,7 +20,7 @@ Just my own implementation (and extension?) of the [Write Yourself a Scheme in 4
 
 ### Exercises 3
 - [X] Add Primitives for [type-testing](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3): `symbol?`, `string?`, `number?` etc.
-- [ ] Remove _weak typing_ from `unpackNum`, s.t. it always returns 0 if the value is not a number
+- [X] Remove _weak typing_ from `unpackNum`, s.t. it always returns 0 if the value is not a number
 - [ ] Add [symbol-handling functions](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.3)
 
 ## TODO
