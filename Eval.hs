@@ -36,6 +36,8 @@ primitives = [("+", numericBinop (+)),
               ("mod", numericBinop mod),
               ("quotient", numericBinop quot),
               ("remainder", numericBinop rem),
+              ("symbol->string", unaryOp symbolToString),
+              ("string->symbol", unaryOp stringToSymbol),
               ("symbol?", unaryOp isSymbol),
               ("char?", unaryOp isCharacter),
               ("string?", unaryOp isString),
@@ -47,6 +49,12 @@ primitives = [("+", numericBinop (+)),
               ("list?", unaryOp isList),
               ("pair?", unaryOp isPair),
               ("vector?", unaryOp isVector)]
+
+symbolToString, stringToSymbol :: LispVal -> LispVal
+symbolToString (Atom s)   = String s
+symbolToString _          = String ""
+stringToSymbol (String s) = Atom s
+stringToSymbol _          = Atom ""
 
 isSymbol, isCharacter, isString, isNumber, isReal, isRational, isComplex, isBool, isList, isPair, isVector :: LispVal -> LispVal
 isSymbol (Atom _)         = Bool True
