@@ -22,6 +22,7 @@ data LispVal = Atom String
              | Bool Bool
 
 instance Show LispVal where show = showVal
+
 showVal :: LispVal -> String
 showVal (Atom name) = name
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
