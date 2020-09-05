@@ -1,14 +1,8 @@
 {-# LANGUAGE ExistentialQuantification #-}
-module Main where
-import Text.ParserCombinators.Parsec hiding (spaces)
-import System.Environment
+module Eval where
 import Parse
+import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad.Except
-
-main :: IO ()
-main = do args <- getArgs
-          evaled <- return $ liftM show $ readExpr (args !! 0) >>= eval
-          putStrLn $ extractValue $ trapError evaled
 
 --- Evaluating ---
 readExpr :: String -> ThrowsError LispVal

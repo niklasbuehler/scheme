@@ -24,12 +24,12 @@ Just my own implementation (and extension?) of the [Write Yourself a Scheme in 4
 - [X] Add [symbol-handling functions](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.3)
 
 ### Exercises 5
-- [ ] Make `if` only accept `Bool` values
+- [ ] ~~Make `if` only accept `Bool` values~~
 - [X] Make `equal?` use `equal?` when comparing lists (instead of `eqv?`)
 - [ ] Implement `cond` and `case` expressions
 - [X] Implement the rest of the [string functions](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.5)
 
-## TODO
+## Extra tasks
 - [ ] Parse escaped characters, even when they're not part of a string
 - [ ] Eval pattern for `quasiquote` and `unquote-splicing`
 - [ ] Implement `eqv?` for vectors
