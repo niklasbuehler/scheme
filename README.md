@@ -23,8 +23,15 @@ Just my own implementation (and extension?) of the [Write Yourself a Scheme in 4
 - [X] Remove _weak typing_ from `unpackNum`, s.t. it always returns 0 if the value is not a number
 - [X] Add [symbol-handling functions](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.3)
 
+### Exercises 5
+- [ ] Make `if` only accept `Bool` values
+- [ ] Make `equal?` use `equal?` when comparing lists (instead of `eqv?`)
+- [ ] Implement `cond` and `case` expressions
+- [ ] Implement the rest of the [string functions](http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-9.html#%_sec_6.3.5)
+
 ## TODO
 - [ ] Parse escaped characters, even when they're not part of a string
 - [ ] Eval pattern for `quasiquote` and `unquote-splicing`
+- [ ] Implement `eqv?` for vectors
 
 [tutorial]: https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours
