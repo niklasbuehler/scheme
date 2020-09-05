@@ -79,6 +79,8 @@ primitives = [("+", numericBinop (+)),
               ("car", car),
               ("cdr", cdr),
               ("cons", cons),
+              ("string-length", stringLen),
+              ("string-ref", stringRef),
               ("eq?", eqv),
               ("eqv?", eqv),
               ("equal?", equal)]
@@ -173,6 +175,20 @@ cons [x, DottedList xs xlast] = return $ DottedList (x : xs) xlast
 cons [x1, x2] = return $ DottedList [x1] x2
 cons badArgList = throwError $ NumArgs 2 badArgList
 
+stringLen :: [LispVal] -> ThrowsError LispVal
+stringLen [(String s)] = Right $ Number $ fromIntegral $ length s
+stringLen [notString]  = throwError $ TypeMismatch "string" notString
+stringLen badArgList   = throwError $ NumArgs 1 badArgList
+
+stringRef :: [LispVal] -> ThrowsError LispVal
+stringRef [(String s), (Number k)]
+  | length s < k' + 1 = throwError $ Default "Out of bound error"
+  | otherwise         = Right $ String $ [s !! k']
+  where k' = fromIntegral k
+stringRef [(String s), notNum] = throwError $ TypeMismatch "number" notNum
+stringRef [notString, _]       = throwError $ TypeMismatch "string" notString
+stringRef badArgList           = throwError $ NumArgs 2 badArgList
+
 eqv :: [LispVal] -> ThrowsError LispVal
 eqv [(Bool arg1), (Bool arg2)]             = return $ Bool $ arg1 == arg2
 eqv [(Number arg1), (Number arg2)]         = return $ Bool $ arg1 == arg2
@@ -232,6 +248,7 @@ showError (Parser parseErr)             = "Parse error at " ++ show parseErr
 showError (BadSpecialForm message form) = message ++ ": " ++ show form
 showError (NotFunction message func)    = message ++ ": " ++ show func
 showError (UnboundVar message varname)  = message ++ ": " ++ varname
+showError (Default message)  = message
 
 type ThrowsError = Either LispError
 
