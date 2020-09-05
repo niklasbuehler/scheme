@@ -17,7 +17,6 @@ eval val@(Real _)               = return val
 eval val@(Rational _)           = return val
 eval val@(Complex _)            = return val
 eval val@(Number _)             = return val
-eval val@(Atom _)               = return val
 eval val@(Vector _)             = return val
 eval val@(Bool _)               = return val
 eval (List [Atom "quote", val]) = return val

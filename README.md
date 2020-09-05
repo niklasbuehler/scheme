@@ -3,6 +3,8 @@ Write Yourself a Scheme in 48 Hours
 
 Just my own implementation (and extension?) of the [Write Yourself a Scheme in 48 Hours][tutorial] tutorial.
 
+Build with `ghc -dynamic --make Repl.hs`
+
 ## Exercises
 ### Exercises 2.1
 - [ ] Rewrite `parseNumber` without using `liftM`
