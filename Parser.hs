@@ -1,43 +1,14 @@
-module Parse where
-import Text.ParserCombinators.Parsec hiding (spaces)
-import Control.Monad
+module Parser where
 import Numeric
 import Data.Char (digitToInt)
-import Data.List (foldl')
 import Data.Ratio
 import Data.Complex
 import Data.Array
+import Text.ParserCombinators.Parsec hiding (spaces)
+import Data.List (foldl')
+import Control.Monad
 
---- Datatypes ---
-data LispVal = Atom String
-             | List [LispVal]
-             | DottedList [LispVal] LispVal
-             | Vector (Array Int LispVal)
-             | Number Integer
-             | Real Double
-             | Rational Rational
-             | Complex (Complex Double)
-             | String String
-             | Character Char
-             | Bool Bool
-
-instance Show LispVal where show = showVal
-
-showVal :: LispVal -> String
-showVal (Atom name) = name
-showVal (List contents) = "(" ++ unwordsList contents ++ ")"
-showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
-showVal (Vector array) = "#(" ++ show (unwordsList (elems array)) ++ ")"
-showVal (Number contents) = show contents
-showVal (Real contents) = show contents
-showVal (Rational contents) = show contents
-showVal (Complex contents) = show contents
-showVal (String contents) = "\"" ++ contents ++ "\""
-showVal (Character contents) = "'" ++ [contents] ++ "'"
-showVal (Bool True) = "#t"
-showVal (Bool False) = "#f"
-unwordsList :: [LispVal] -> String
-unwordsList = unwords . map showVal
+import Base
 
 --- Parsing ---
 parseScheme :: String -> Either ParseError LispVal

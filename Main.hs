@@ -1,6 +1,7 @@
 module Main where
-import Repl
 import System.Environment
+
+import Repl
 
 main :: IO ()
 main = do args <- getArgs
