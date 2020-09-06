@@ -4,36 +4,6 @@ import Parse
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad.Except
 
---- Evaluating ---
-readExpr :: String -> ThrowsError LispVal
-readExpr input = case parseScheme input of
-  Left err  -> throwError $ Parser err
-  Right val -> return val
-
-eval :: LispVal -> ThrowsError LispVal
-eval val@(Character _)          = return val
-eval val@(String _)             = return val
-eval val@(Real _)               = return val
-eval val@(Rational _)           = return val
-eval val@(Complex _)            = return val
-eval val@(Number _)             = return val
-eval val@(Vector _)             = return val
-eval val@(Bool _)               = return val
-eval (List [Atom "quote", val]) = return val
-eval (List [Atom "if", pred, conseq, alt]) =
-     do result <- eval pred
-        case result of
-             Bool False -> eval alt
-             otherwise  -> eval conseq
-eval (List (Atom func : args))  = mapM eval args >>= apply func
-eval val@(DottedList _ _)       = return val
-eval badForm = throwError $ BadSpecialForm "Unrecognized special form" badForm
-
-apply :: String -> [LispVal] -> ThrowsError LispVal
-apply func args = maybe (throwError $ NotFunction "Unrecognized primitive function args" func)
-                        ($ args)
-                        (lookup func primitives)
-
 --- Primitives ---
 primitives :: [(String, [LispVal] -> ThrowsError LispVal)]
 primitives = [("+", numericBinop (+)),
@@ -245,7 +215,6 @@ showError (Default message)  = message
 
 type ThrowsError = Either LispError
 
-trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)
 
 extractValue :: ThrowsError a -> a
