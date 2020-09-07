@@ -1,7 +1,5 @@
 {-# LANGUAGE ExistentialQuantification #-}
 module Primitives where
-import Text.ParserCombinators.Parsec hiding (spaces)
-import Control.Monad
 import Control.Monad.Except
 
 import Base
