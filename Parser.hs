@@ -34,7 +34,7 @@ spaces :: Parser ()
 spaces = skipMany1 space
 
 symbol :: Parser Char
-symbol = oneOf "?!$%^&+-*/:<=>_~"
+symbol = oneOf "?!$%^&+-*/:<=>_~|"
 
 --- Parsing Character Types ---
 parseString :: Parser LispVal
